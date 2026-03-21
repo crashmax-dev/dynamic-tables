@@ -1,11 +1,12 @@
 {
-  "name": "open-table",
+  "name": "dynamic-tables",
   "type": "module",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "api": "tsx api/main.ts",
+    "dev": "pnpm run /^dev:.*/",
+    "dev:frontend": "vite",
+    "dev:backend": "tsx watch api/main.ts",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint . --cache",
