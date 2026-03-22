@@ -424,17 +424,34 @@ function onHeaderContextMenu(e: MouseEvent, columnId: string) {
 function onToggleVisibility(columnId: string) {
   const col = props.table.columns.find(c => String(c.id) === columnId)
   if (!col) return
-  updateColumn({ id: col.id, tableId: props.table.id, data: { visible: !col.visible } })
+  updateColumn({
+    id: col.id,
+    tableId: props.table.id,
+    data: { visible: !col.visible },
+  })
   ctxMenu.visible = false
 }
 
 function onMoveColumn(columnId: string, direction: -1 | 1) {
   const order = [...localColumnOrder.value]
-  const idx = order.indexOf(columnId)
-  if (idx === -1) return
-  const newIdx = idx + direction
-  if (newIdx < 0 || newIdx >= order.length) return;
-  [order[idx], order[newIdx]] = [order[newIdx], order[idx]]
+  const currentIdx = order.indexOf(columnId)
+  if (currentIdx === -1) return
+
+  let targetIdx = -1
+  let i = currentIdx + direction
+  while (i >= 0 && i < order.length) {
+    const isVisible = props.table.columns
+      .find(c => String(c.id) === order[i])
+      ?.visible
+    if (isVisible) {
+      targetIdx = i
+      break
+    }
+    i += direction
+  }
+
+  if (targetIdx === -1) return;
+  [order[currentIdx], order[targetIdx]] = [order[targetIdx], order[currentIdx]]
   tanTable.setColumnOrder(order)
   reorderColumns({
     tableId: props.table.id,
