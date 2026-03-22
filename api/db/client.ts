@@ -1,18 +1,17 @@
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
-import * as schema from './schema'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
+import * as schema from './schema.ts'
 import 'dotenv/config'
 
-const connectionString = process.env.DATABASE_URL
-if (!connectionString) {
+const databaseURL = process.env.DATABASE_URL
+if (!databaseURL) {
   throw new Error('DATABASE_URL is not defined in environment variables')
 }
 
-const client = postgres(connectionString, {
+const client = new Pool({
   max: 10,
-  ssl: process.env.NODE_ENV === 'production' ? 'require' : undefined,
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production',
 })
 
 export const db = drizzle(client, { schema })
-
-export type DB = typeof db

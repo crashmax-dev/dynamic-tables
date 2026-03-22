@@ -2,9 +2,9 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import { columnsRouter } from './routes/table-columns'
-import { rowsRouter } from './routes/table-rows'
-import { tablesRouter } from './routes/tables'
+import { columnsRouter } from './routes/table-columns.ts'
+import { rowsRouter } from './routes/table-rows.ts'
+import { tablesRouter } from './routes/tables.ts'
 import 'dotenv/config'
 
 const app = new Hono()

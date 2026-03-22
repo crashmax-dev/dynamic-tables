@@ -203,7 +203,7 @@ function onInput(val: string) {
     height: 20px;
 
     &--on {
-      background: var(--color-primary);
+      background: var(--color-muted-foreground);
     }
   }
 
@@ -213,7 +213,7 @@ function onInput(val: string) {
     left: 2px;
     transition: transform 0.2s;
     border-radius: 50%;
-    background: white;
+    background: var(--color-foreground);
     width: 16px;
     height: 16px;
 

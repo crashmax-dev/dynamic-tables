@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { db } from '../db/client'
-import { tables } from '../db/schema'
+import { db } from '../db/client.ts'
+import { tables } from '../db/schema.ts'
 
 export const tablesRouter = new Hono()
 

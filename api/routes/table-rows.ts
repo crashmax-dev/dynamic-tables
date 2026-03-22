@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { db } from '../db/client'
-import { entityValues, tableRows } from '../db/schema'
+import { db } from '../db/client.ts'
+import { entityValues, tableRows } from '../db/schema.ts'
 
 export const rowsRouter = new Hono()
 
