@@ -51,8 +51,8 @@
         >
         <input
           v-model="opt.label"
-          class="field__input"
-          placeholder="Плохо / Пойдет / Круто"
+          class="col-editor__label field__input"
+          placeholder="Укажите вариант"
         >
         <button
           class="col-editor__remove"
@@ -142,6 +142,10 @@ function save() {
     padding: 2px;
     width: 32px;
     height: 32px;
+  }
+
+  &__label {
+    flex-grow: 1;
   }
 
   &__remove {
