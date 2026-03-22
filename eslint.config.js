@@ -6,6 +6,9 @@ export default antfu({
   markdown: true,
   yaml: true,
   vue: true,
+  ignores: [
+    'api/db/migrations/meta',
+  ],
   formatters: {
     css: true,
     prettierOptions: {
