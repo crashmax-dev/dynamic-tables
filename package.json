@@ -18,6 +18,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "repomix": "repomix",
     "prebuild": "pnpm type-check"
   },
   "dependencies": {
@@ -44,6 +45,7 @@
     "eslint-plugin-format": "2.0.1",
     "eslint-plugin-pinia": "0.4.2",
     "prettier-plugin-css-order": "2.2.0",
+    "repomix": "1.12.0",
     "sass-embedded": "1.98.0",
     "typescript": "5.9.3",
     "vite": "8.0.1",
