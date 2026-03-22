@@ -7,14 +7,18 @@
     "dev": "pnpm run /^dev:.*/",
     "dev:frontend": "vite",
     "dev:backend": "node ./api/main.ts",
-    "build": "vue-tsc -b && vite build",
+    "type-check": "pnpm run /^type-check:.*/",
+    "type-check:frontend": "vue-tsc --noEmit --project tsconfig.app.json",
+    "type-check:backend": "tsc --noEmit --project tsconfig.node.json",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --cache",
     "lint:fix": "eslint . --fix --cache",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "prebuild": "pnpm type-check"
   },
   "dependencies": {
     "@hono/node-server": "1.19.11",

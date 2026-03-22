@@ -14,4 +14,7 @@ const client = new Pool({
   ssl: process.env.NODE_ENV === 'production',
 })
 
-export const db = drizzle(client, { schema })
+export const db = drizzle(client, {
+  schema,
+  casing: 'snake_case',
+})

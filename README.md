@@ -1,24 +1,24 @@
 # Dynamic Tables
 
-### Installation
+### Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### Docker
+### Setup docker
 
 ```bash
 docker compose up -d
 ```
 
-### Migrations
+### Apply migrations
 
 ```bash
 pnpm db:migrate
 ```
 
-### Run
+### Run dev server
 
 ```bash
 pnpm dev
