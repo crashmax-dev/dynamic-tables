@@ -1,0 +1,1 @@
+ALTER TABLE "table_rows" ADD COLUMN "order" integer DEFAULT 0 NOT NULL;

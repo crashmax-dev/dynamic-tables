@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
 import { tablesApi } from '../api/tables'
 import type { ColumnType } from '../types'
 
-// Список таблиц
 export function useTablesQuery() {
   return useQuery({
     key: ['tables'],
@@ -10,7 +9,6 @@ export function useTablesQuery() {
   })
 }
 
-// Одна таблица с колонками и строками
 export function useTableQuery(id: () => number | null) {
   return useQuery({
     key: () => ['tables', id()],
@@ -19,7 +17,6 @@ export function useTableQuery(id: () => number | null) {
   })
 }
 
-// Создать таблицу
 export function useCreateTable() {
   const cache = useQueryCache()
   return useMutation({
@@ -28,21 +25,17 @@ export function useCreateTable() {
   })
 }
 
-// Удалить таблицу
 export function useDeleteTable() {
   const cache = useQueryCache()
   return useMutation({
     mutation: (id: number) => tablesApi.delete(id),
     onSuccess: (_data, id) => {
-      // Сначала убираем кеш этой таблицы — без рефетча
       cache.setQueryData(['tables', id], undefined)
-      // Потом инвалидируем список
       cache.invalidateQueries({ key: ['tables'] })
     },
   })
 }
 
-// Добавить строку
 export function useAddRow() {
   const cache = useQueryCache()
   return useMutation({
@@ -51,7 +44,6 @@ export function useAddRow() {
   })
 }
 
-// Добавить столбец — та же проблема
 export function useAddColumn() {
   const cache = useQueryCache()
   return useMutation({
@@ -65,16 +57,54 @@ export function useAddColumn() {
   })
 }
 
-// Upsert — добавь tableId в payload для инвалидации при ошибке
+export function useUpdateColumn() {
+  const cache = useQueryCache()
+  return useMutation({
+    mutation: ({
+      id,
+      data,
+    }: {
+      id: number
+      tableId: number
+      data: { name?: string, visible?: boolean, order?: number }
+    }) => tablesApi.updateColumn(id, data),
+    onSuccess: (_result, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
+  })
+}
+
+export function useReorderColumns() {
+  const cache = useQueryCache()
+  return useMutation({
+    mutation: ({ orderedIds }: { tableId: number, orderedIds: number[] }) => tablesApi.reorderColumns(orderedIds),
+    onSettled: (_data, _error, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
+  })
+}
+
+export function useReorderRows() {
+  const cache = useQueryCache()
+  return useMutation({
+    mutation: ({ orderedIds }: { tableId: number, orderedIds: number[] }) => tablesApi.reorderRows(orderedIds),
+    onSettled: (_data, _error, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
+  })
+}
+
 export function useUpsertValue() {
   const cache = useQueryCache()
   return useMutation({
-    mutation: ({ rowId, columnId, value }: { rowId: number, columnId: number, value: string, tableId: number }) => tablesApi.upsertValue(rowId, columnId, value),
+    mutation: ({
+      rowId,
+      columnId,
+      value,
+    }: {
+      rowId: number
+      columnId: number
+      value: string
+      tableId: number
+    }) => tablesApi.upsertValue(rowId, columnId, value),
     onError: (_error, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
   })
 }
 
-// Удалить строку
 export function useDeleteRow() {
   const cache = useQueryCache()
   return useMutation({

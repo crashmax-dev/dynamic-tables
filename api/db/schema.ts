@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm'
 import {
+  boolean,
   integer,
   pgEnum,
   pgTable,
@@ -30,6 +31,7 @@ export const tableColumns = pgTable('table_columns', {
   name: text().notNull(),
   type: columnTypeEnum().notNull().default('text'),
   order: integer().notNull().default(0),
+  visible: boolean().notNull().default(true),
 })
 
 export const columnOptions = pgTable('column_options', {
@@ -47,6 +49,7 @@ export const tableRows = pgTable('table_rows', {
   tableId: integer()
     .notNull()
     .references(() => tables.id, { onDelete: 'cascade' }),
+  order: integer().notNull().default(0),
   createdAt: timestamp().defaultNow().notNull(),
 })
 

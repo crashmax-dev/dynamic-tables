@@ -1,0 +1,1 @@
+ALTER TABLE "table_columns" ADD COLUMN "visible" boolean DEFAULT true NOT NULL;

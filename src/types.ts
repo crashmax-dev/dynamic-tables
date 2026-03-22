@@ -10,8 +10,8 @@ export interface TableColumn {
   id: number
   name: string
   type: ColumnType
-  order: number
-  options?: ColumnOption[] // только для select
+  visible: boolean
+  options?: ColumnOption[]
 }
 
 export interface CellValue {
@@ -21,6 +21,7 @@ export interface CellValue {
 
 export interface TableRow {
   id: number
+  order: number
   values: CellValue[]
 }
 
@@ -29,4 +30,16 @@ export interface DynamicTable {
   name: string
   columns: TableColumn[]
   rows: TableRow[]
+}
+
+export interface TableUiState {
+  columnOrder: string[]
+  sorting: {
+    id: string
+    desc: boolean
+  }[]
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
 }

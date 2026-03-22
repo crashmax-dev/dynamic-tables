@@ -1,7 +1,7 @@
 import antfu from '@antfu/eslint-config'
 import pinia from 'eslint-plugin-pinia'
 
-export default antfu({
+const config = antfu({
   typescript: true,
   markdown: true,
   yaml: true,
@@ -126,3 +126,9 @@ export default antfu({
     },
   },
 })
+
+config.removeRules(
+  'pinia/require-setup-store-properties-export',
+)
+
+export default config

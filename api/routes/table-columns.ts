@@ -5,7 +5,6 @@ import { columnOptions, tableColumns } from '../db/schema.ts'
 
 export const columnsRouter = new Hono()
 
-// POST /columns — добавить столбец к таблице
 columnsRouter.post('/', async (c) => {
   const body = await c.req.json<{
     tableId: number
@@ -30,7 +29,6 @@ columnsRouter.post('/', async (c) => {
     )
   }
 
-  // Возвращаем колонку с опциями
   const result = await db.query.tableColumns.findFirst({
     where: eq(tableColumns.id, col.id),
     with: { options: true },
@@ -38,15 +36,33 @@ columnsRouter.post('/', async (c) => {
   return c.json(result, 201)
 })
 
-// PATCH /columns/:id — переименовать столбец
-columnsRouter.patch('/:id', async (c) => {
-  const id = Number(c.req.param('id'))
-  const { name } = await c.req.json<{ name: string }>()
-  await db.update(tableColumns).set({ name }).where(eq(tableColumns.id, id))
+columnsRouter.patch('/reorder', async (c) => {
+  const { orderedIds } = await c.req.json<{ orderedIds: number[] }>()
+  await db.transaction(async (tx) => {
+    await Promise.all(
+      orderedIds.map((id, index) => tx.update(tableColumns).set({ order: index }).where(eq(tableColumns.id, id))),
+    )
+  })
   return c.json({ ok: true })
 })
 
-// DELETE /columns/:id
+columnsRouter.patch('/:id', async (c) => {
+  const id = Number(c.req.param('id'))
+  const body = await c.req.json<{ name?: string, visible?: boolean, order?: number }>()
+
+  const patch: Partial<{ name: string, visible: boolean, order: number }> = {}
+  if (body.name !== undefined) patch.name = body.name
+  if (body.visible !== undefined) patch.visible = body.visible
+  if (body.order !== undefined) patch.order = body.order
+
+  if (!Object.keys(patch).length) {
+    return c.json({ error: 'No fields to update' }, 400)
+  }
+
+  await db.update(tableColumns).set(patch).where(eq(tableColumns.id, id))
+  return c.json({ ok: true })
+})
+
 columnsRouter.delete('/:id', async (c) => {
   const id = Number(c.req.param('id'))
   await db.delete(tableColumns).where(eq(tableColumns.id, id))

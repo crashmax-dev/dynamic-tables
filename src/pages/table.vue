@@ -1,6 +1,5 @@
 <template>
   <div class="table-page">
-    <!-- Сайдбар -->
     <aside class="table-page__sidebar">
       <div class="sidebar-header">
         <span class="sidebar-header__title">Таблицы</span>
@@ -73,7 +72,6 @@
       </nav>
     </aside>
 
-    <!-- Контент -->
     <main class="table-page__content">
       <template v-if="activeTableId">
         <div
@@ -97,8 +95,8 @@
                 + Столбец
               </button>
               <button
-                :disabled="!isCanCreateRows"
                 class="btn btn--primary"
+                :disabled="!isCanCreateRows"
                 @click="onAddRow"
               >
                 + Строка
@@ -108,8 +106,12 @@
 
           <table-dynamic
             :table="activeTable"
+            :loading="tableAsyncStatus === 'loading'"
+            :virtual="activeTable.rows.length > 200"
+            paginated
             @cell-change="onCellChange"
             @delete-row="confirmDeleteRow"
+            @rows-reorder="onRowsReorder"
           />
         </template>
       </template>
@@ -149,7 +151,6 @@
       </div>
     </main>
 
-    <!-- Диалог: создать таблицу -->
     <app-dialog
       v-model="showNewTableDialog"
       title="Новая таблица"
@@ -181,7 +182,6 @@
       </template>
     </app-dialog>
 
-    <!-- Диалог: добавить столбец -->
     <app-dialog
       v-model="showColumnEditor"
       title="Новый столбец"
@@ -189,7 +189,6 @@
       <table-column-editor @save="onAddColumn" />
     </app-dialog>
 
-    <!-- Диалог: подтверждение удаления -->
     <app-dialog
       v-model="showDeleteDialog"
       title="Подтвердить удаление"
@@ -245,12 +244,19 @@ const activeTableId = useRouteQuery<number | null>('table', undefined, {
   },
 })
 
-const { data: tableList, isLoading: listLoading } = useTablesQuery()
-const { data: activeTable, isLoading: tableLoading } = useTableQuery(() => activeTableId.value)
+const {
+  data: tableList,
+  isLoading: listLoading,
+} = useTablesQuery()
+
+const {
+  data: activeTable,
+  isPending: tableLoading,
+  asyncStatus: tableAsyncStatus,
+} = useTableQuery(() => activeTableId.value)
 
 const { mutateAsync: createTable, isLoading: createLoading } = useCreateTable()
 const { mutateAsync: deleteTable } = useDeleteTable()
-
 const { mutateAsync: addColumn } = useAddColumn()
 const { mutateAsync: addRow } = useAddRow()
 const { mutateAsync: deleteRow } = useDeleteRow()
@@ -279,7 +285,6 @@ watch(tableList, (list) => {
   }
 }, { immediate: true })
 
-// Фокус на инпут при открытии диалога
 watch(showNewTableDialog, async (val) => {
   if (val) {
     await nextTick()
@@ -312,20 +317,15 @@ async function onAddColumn(payload: {
 
 function onCellChange(rowId: number, columnId: number, value: string) {
   if (!activeTableId.value) return
-  upsertValue({
-    rowId,
-    columnId,
-    value,
-    tableId: activeTableId.value,
-  })
+  upsertValue({ rowId, columnId, value, tableId: activeTableId.value })
 }
 
+// rows-reorder эмитится из table-dynamic уже после сохранения в БД,
+// здесь достаточно просто принять событие (можно использовать для аналитики / логов)
+function onRowsReorder(_orderedIds: number[]) {}
+
 function confirmDeleteTable(table: TableMeta) {
-  deleteTarget.value = {
-    type: 'table',
-    id: table.id,
-    name: table.name,
-  }
+  deleteTarget.value = { type: 'table', id: table.id, name: table.name }
   showDeleteDialog.value = true
 }
 
@@ -340,7 +340,6 @@ async function onConfirmDelete() {
   try {
     if (deleteTarget.value.type === 'table') {
       const idToDelete = deleteTarget.value.id
-      // Переключаемся ДО удаления — иначе useTableQuery сделает рефетч удалённой таблицы
       activeTableId.value = tableList.value?.find(t => t.id !== idToDelete)?.id ?? null
       await deleteTable(idToDelete)
     } else {

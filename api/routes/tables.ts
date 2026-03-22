@@ -1,11 +1,10 @@
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { db } from '../db/client.ts'
-import { tables } from '../db/schema.ts'
+import { tableColumns, tables } from '../db/schema.ts'
 
 export const tablesRouter = new Hono()
 
-// GET /tables — список таблиц
 tablesRouter.get('/', async (c) => {
   const result = await db.query.tables.findMany({
     orderBy: (t, { desc }) => [desc(t.createdAt)],
@@ -13,7 +12,6 @@ tablesRouter.get('/', async (c) => {
   return c.json(result)
 })
 
-// POST /tables — создать таблицу
 tablesRouter.post('/', async (c) => {
   const { name } = await c.req.json<{ name: string }>()
   if (!name?.trim()) return c.json({ error: 'name is required' }, 400)
@@ -22,27 +20,43 @@ tablesRouter.post('/', async (c) => {
   return c.json(table, 201)
 })
 
-// DELETE /tables/:id
 tablesRouter.delete('/:id', async (c) => {
   const id = Number(c.req.param('id'))
   await db.delete(tables).where(eq(tables.id, id))
   return c.json({ ok: true })
 })
 
-// GET /tables/:id — таблица с колонками, строками и значениями
 tablesRouter.get('/:id', async (c) => {
   const id = Number(c.req.param('id'))
+
+  const visibleColumns = await db
+    .select({ id: tableColumns.id })
+    .from(tableColumns)
+    .where(and(eq(tableColumns.tableId, id), eq(tableColumns.visible, true)))
+
+  const visibleColumnIds = visibleColumns.map(c => c.id)
 
   const table = await db.query.tables.findFirst({
     where: eq(tables.id, id),
     with: {
       columns: {
+        columns: {
+          tableId: false,
+          order: false,
+        },
         with: { options: { orderBy: (o, { asc }) => [asc(o.order)] } },
         orderBy: (col, { asc }) => [asc(col.order)],
       },
       rows: {
-        with: { values: true },
-        orderBy: (r, { asc }) => [asc(r.createdAt)],
+        columns: {
+          tableId: false,
+        },
+        with: {
+          values: visibleColumnIds.length
+            ? { where: (v, { inArray }) => inArray(v.columnId, visibleColumnIds) }
+            : undefined,
+        },
+        orderBy: (r, { asc }) => [asc(r.order), asc(r.createdAt)],
       },
     },
   })

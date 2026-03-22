@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm run /^dev:.*/",
     "dev:frontend": "vite",
-    "dev:backend": "node ./api/main.ts",
+    "dev:backend": "node --watch ./api/main.ts",
     "type-check": "pnpm run /^type-check:.*/",
     "type-check:frontend": "vue-tsc --noEmit --project tsconfig.app.json",
     "type-check:backend": "tsc --noEmit --project tsconfig.node.json",
@@ -24,6 +24,8 @@
   "dependencies": {
     "@hono/node-server": "1.19.11",
     "@pinia/colada": "1.0.0",
+    "@tanstack/vue-table": "8.21.3",
+    "@tanstack/vue-virtual": "3.13.23",
     "@vueuse/core": "14.2.1",
     "@vueuse/router": "14.2.1",
     "dotenv": "17.3.1",
