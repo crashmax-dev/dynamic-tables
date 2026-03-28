@@ -21,6 +21,7 @@
   "include": [
     "api/**/*.ts",
     "drizzle.config.ts",
-    "vite.config.ts"
+    "vite.config.ts",
+    "eslint.config.ts"
   ]
 }
