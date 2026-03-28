@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { ColumnType } from '../types'
+import type { ColumnType } from '../../../types'
 
 const emit = defineEmits<{
   save: [payload: {

@@ -91,7 +91,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { TableColumn } from '../types'
+import type { TableColumn } from '../../../types'
 
 const props = defineProps<{
   column: TableColumn
