@@ -37,8 +37,8 @@
 </template>
 
 <script setup lang="ts">
+import type { TableRow } from '@/types'
 import type { Table } from '@tanstack/vue-table'
-import type { TableRow } from '../../../types'
 
 defineProps<{
   table: Table<TableRow>

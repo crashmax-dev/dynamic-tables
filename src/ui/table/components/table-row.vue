@@ -46,9 +46,9 @@
 </template>
 
 <script setup lang="ts">
+import type { TableRow } from '@/types'
 import TableCellRenderer from './table-cell-renderer.vue'
 import type { Row } from '@tanstack/vue-table'
-import type { TableRow } from '../../../types'
 
 defineProps<{
   row: Row<TableRow>

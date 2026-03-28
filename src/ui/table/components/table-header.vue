@@ -31,8 +31,8 @@
 </template>
 
 <script setup lang="ts">
+import type { TableRow } from '@/types'
 import type { Header } from '@tanstack/vue-table'
-import type { TableRow } from '../../../types'
 
 defineProps<{
   headers: Header<TableRow, unknown>[]

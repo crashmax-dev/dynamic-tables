@@ -1,6 +1,6 @@
 import { useLocalStorage } from '@vueuse/core'
 import { defineStore } from 'pinia'
-import type { TableUiState } from '../types'
+import type { TableUiState } from '@/types'
 
 const DEFAULT_PAGE_SIZE = 100
 

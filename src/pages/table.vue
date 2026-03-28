@@ -221,6 +221,7 @@
 <script setup lang="ts">
 import { useRouteQuery } from '@vueuse/router'
 import { computed, nextTick, ref, watch } from 'vue'
+import type { TableMeta } from '@/api/tables'
 import {
   useAddColumn,
   useAddRow,
@@ -230,12 +231,11 @@ import {
   useTableQuery,
   useTablesQuery,
   useUpsertValue,
-} from '../queries/tables'
-import AppDialog from '../ui/app-dialog.vue'
-import TableColumnEditor from '../ui/table/components/table-column-editor.vue'
-import TableDynamic from '../ui/table/table-dynamic.vue'
-import type { TableMeta } from '../api/tables'
-import type { ColumnType } from '../types'
+} from '@/queries/tables'
+import type { ColumnType } from '@/types'
+import AppDialog from '@/ui/app-dialog.vue'
+import TableColumnEditor from '@/ui/table/components/table-column-editor.vue'
+import TableDynamic from '@/ui/table/table-dynamic.vue'
 
 const activeTableId = useRouteQuery<number | null>('table', undefined, {
   transform(val) {

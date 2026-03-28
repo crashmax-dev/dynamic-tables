@@ -1,8 +1,8 @@
 import { computed, reactive, toValue } from 'vue'
-import { useReorderColumns, useUpdateColumn } from '../../../queries/tables'
+import { useReorderColumns, useUpdateColumn } from '@/queries/tables'
+import type { DynamicTable, TableRow } from '@/types'
 import type { Table } from '@tanstack/vue-table'
 import type { MaybeRefOrGetter } from 'vue'
-import type { DynamicTable, TableRow } from '../../../types'
 
 export function useTableColumns(
   tableRef: MaybeRefOrGetter<DynamicTable>,

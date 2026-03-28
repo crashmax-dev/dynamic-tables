@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
-import { tablesApi } from '../api/tables'
-import type { ColumnType } from '../types'
+import { tablesApi } from '@/api/tables'
+import type { ColumnType } from '@/types'
 
 export function useTablesQuery() {
   return useQuery({

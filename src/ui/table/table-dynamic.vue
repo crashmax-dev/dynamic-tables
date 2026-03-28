@@ -98,6 +98,7 @@
 
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue'
+import type { DynamicTable } from '@/types'
 import TableHeaderContextMenu from './components/table-header-context-menu.vue'
 import TableHeader from './components/table-header.vue'
 import TablePagination from './components/table-pagination.vue'
@@ -107,7 +108,6 @@ import { useTableColumns } from './composables/use-table-columns'
 import { useTableCore } from './composables/use-table-core'
 import { useTableDrag } from './composables/use-table-drag'
 import { useTableVirtualizer } from './composables/use-table-virtualizer'
-import type { DynamicTable } from '../../types'
 
 const props = defineProps<{
   table: DynamicTable

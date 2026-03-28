@@ -1,7 +1,7 @@
 import { useVirtualizer } from '@tanstack/vue-virtual'
 import { computed } from 'vue'
+import type { TableRow } from '@/types'
 import type { Ref } from 'vue'
-import type { TableRow } from '../../../types'
 
 export function useTableVirtualizer(
   scrollRef: Ref<HTMLElement | null>,

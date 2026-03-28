@@ -5,9 +5,9 @@ import {
   useVueTable,
 } from '@tanstack/vue-table'
 import { computed, ref, watch } from 'vue'
-import { useTableStore } from '../../../stores/use-table-store'
+import { useTableStore } from '@/stores/use-table-store'
+import type { DynamicTable, TableRow } from '@/types'
 import type { Updater } from '@tanstack/vue-table'
-import type { DynamicTable, TableRow } from '../../../types'
 
 export function useTableCore(table: () => DynamicTable) {
   const uiStore = useTableStore()

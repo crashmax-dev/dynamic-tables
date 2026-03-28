@@ -1,9 +1,9 @@
-import { api } from './client'
 import type {
   ColumnType,
   DynamicTable,
   TableColumn,
-} from '../types'
+} from '@/types'
+import { api } from './client'
 
 export interface TableMeta {
   id: number
