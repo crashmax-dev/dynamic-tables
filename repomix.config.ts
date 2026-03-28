@@ -3,9 +3,9 @@ import { defineConfig } from 'repomix'
 export default defineConfig({
   output: {
     style: 'markdown',
-    fileSummary: false,
     tokenCountTree: true,
     removeComments: true,
+    copyToClipboard: true,
     directoryStructure: true,
   },
   security: {
