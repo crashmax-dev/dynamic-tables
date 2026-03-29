@@ -1,51 +1,22 @@
 <template>
   <div
     v-if="active"
-    class="sort-notice"
+    class="absolute bottom-0 left-0 right-0 z-10 flex items-center gap-2 border-t bg-muted/90 backdrop-blur-sm px-3 py-1.5 text-muted-foreground text-xs"
   >
-    <span>Таблица отсортирована. Drag & drop недоступен.</span>
+    <span>⠿ Drag & drop to reorder</span>
     <button
-      class="sort-reset"
-      @click="$emit('reset')"
+      class="ml-auto border-none bg-transparent p-0 text-foreground font-medium text-xs underline cursor-pointer hover:opacity-70"
+      @click="emit('reset')"
     >
-      Сбросить
+      Reset
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
 defineProps<{ active: boolean }>()
-defineEmits<{ reset: [] }>()
+
+const emit = defineEmits<{
+  (event: 'reset'): void
+}>()
 </script>
-
-<style scoped lang="scss">
-.sort-notice {
-  display: flex;
-  position: absolute;
-  bottom: 0;
-  align-items: center;
-  gap: 0.5rem;
-  z-index: 1;
-  border-top: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-muted) 90%, var(--color-primary) 5%);
-  padding: 0.375rem 0.75rem;
-  width: 100%;
-  color: var(--color-muted-foreground);
-  font-size: 0.78rem;
-
-  &__reset {
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-    color: var(--color-foreground);
-    font-weight: 500;
-    font-size: 0.78rem;
-    text-decoration: underline;
-
-    &:hover {
-      opacity: 0.7;
-    }
-  }
-}
-</style>

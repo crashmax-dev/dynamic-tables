@@ -8,6 +8,7 @@ const config = antfu({
   vue: true,
   ignores: [
     'api/db/migrations/meta',
+    'src/components/ui',
   ],
   formatters: {
     css: true,

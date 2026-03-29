@@ -20,6 +20,7 @@ export default defineConfig({
   ],
   ignore: {
     customPatterns: [
+      'src/components/ui',
       'api/db/migrations',
     ],
     useGitignore: true,

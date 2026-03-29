@@ -1,96 +1,118 @@
 <template>
-  <div class="col-editor">
-    <label class="field">
-      <span class="field__label">Название</span>
-      <input
+  <div class="flex flex-col gap-4 py-2">
+    <div class="flex flex-col gap-1.5">
+      <ui-label for="col-name">
+        Column name
+      </ui-label>
+      <ui-input
+        id="col-name"
         v-model="name"
-        class="field__input"
-        placeholder="Например: Оценка"
-      >
-    </label>
-
-    <label class="field">
-      <span class="field__label">Тип</span>
-      <select
-        v-model="type"
-        class="field__select"
-      >
-        <option
-          v-for="t in columnTypes"
-          :key="t.value"
-          :value="t.value"
-        >
-          {{ t.label }}
-        </option>
-      </select>
-    </label>
-
-    <div
-      v-if="type === 'select'"
-      class="col-editor__options"
-    >
-      <div class="col-editor__options-header">
-        <span class="field__label">Варианты</span>
-        <button
-          class="btn btn--outline"
-          type="button"
-          @click="addOption"
-        >
-          + Добавить
-        </button>
-      </div>
-      <div
-        v-for="(opt, i) in options"
-        :key="i"
-        class="col-editor__option-row"
-      >
-        <input
-          v-model="opt.color"
-          type="color"
-          class="col-editor__color"
-        >
-        <input
-          v-model="opt.label"
-          class="col-editor__label field__input"
-          placeholder="Укажите вариант"
-        >
-        <button
-          class="col-editor__remove"
-          type="button"
-          @click="removeOption(i)"
-        >
-          ✕
-        </button>
-      </div>
+        placeholder="My column"
+      />
     </div>
 
-    <button
-      class="btn btn--primary"
-      @click="save"
-    >
-      Сохранить
-    </button>
+    <div class="flex flex-col gap-1.5">
+      <ui-label for="col-type">
+        Type
+      </ui-label>
+      <ui-select v-model="type">
+        <select-trigger id="col-type">
+          <select-value />
+        </select-trigger>
+        <select-content>
+          <select-item
+            v-for="ct in columnTypes"
+            :key="ct.value"
+            :value="ct.value"
+          >
+            {{ ct.label }}
+          </select-item>
+        </select-content>
+      </ui-select>
+    </div>
+
+    <template v-if="type === 'select'">
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <ui-label>Options</ui-label>
+          <ui-button
+            variant="ghost"
+            size="sm"
+            type="button"
+            @click="addOption"
+          >
+            <plus-icon class="h-3.5 w-3.5" />
+            Add option
+          </ui-button>
+        </div>
+        <div
+          v-for="(opt, i) in options"
+          :key="i"
+          class="flex items-center gap-2"
+        >
+          <ui-input
+            v-model="opt.color"
+            type="color"
+            class="h-8 w-8 cursor-pointer rounded border border-border p-0.5 bg-background"
+          />
+          <ui-input
+            v-model="opt.label"
+            placeholder="Option label"
+            class="flex-1"
+          />
+          <ui-button
+            variant="ghost"
+            size="icon"
+            type="button"
+            class="h-8 w-8 text-muted-foreground hover:text-destructive"
+            @click="removeOption(i)"
+          >
+            <x-icon class="h-4 w-4" />
+          </ui-button>
+        </div>
+      </div>
+    </template>
+
+    <div class="flex justify-end">
+      <ui-button
+        :disabled="!name.trim()"
+        @click="save"
+      >
+        Add column
+      </ui-button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Plus as PlusIcon, X as XIcon } from 'lucide-vue-next'
 import { ref } from 'vue'
+import { Button as UiButton } from '@/components/ui/button'
+import { Input as UiInput } from '@/components/ui/input'
+import { Label as UiLabel } from '@/components/ui/label'
+import {
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Select as UiSelect,
+} from '@/components/ui/select'
 import type { ColumnType } from '@/types'
 
 const emit = defineEmits<{
-  save: [payload: {
+  (event: 'save', payload: {
     name: string
     type: ColumnType
-    options: typeof options.value
-  }]
+    options: { label: string, color: string }[]
+  }): void
 }>()
 
 const columnTypes: { value: ColumnType, label: string }[] = [
-  { value: 'text', label: 'Текст' },
-  { value: 'number', label: 'Число' },
-  { value: 'select', label: 'Селектор' },
-  { value: 'toggle', label: 'Переключатель' },
-  { value: 'date', label: 'Дата' },
+  { value: 'text', label: 'Text' },
+  { value: 'number', label: 'Number' },
+  { value: 'select', label: 'Select' },
+  { value: 'toggle', label: 'Toggle' },
+  { value: 'date', label: 'Date' },
 ]
 
 const name = ref('')
@@ -114,51 +136,3 @@ function save() {
   })
 }
 </script>
-
-<style scoped lang="scss">
-.col-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  &__options-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-
-  &__option-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.375rem;
-  }
-
-  &__color {
-    cursor: pointer;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    padding: 2px;
-    width: 32px;
-    height: 32px;
-  }
-
-  &__label {
-    flex-grow: 1;
-  }
-
-  &__remove {
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0 0.25rem;
-    color: var(--color-muted-foreground);
-    font-size: 0.875rem;
-
-    &:hover {
-      color: #ef4444;
-    }
-  }
-}
-</style>
