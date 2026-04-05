@@ -2,7 +2,7 @@
   <div class="flex flex-1 flex-col min-w-0 overflow-hidden">
     <div class="flex shrink-0 items-center justify-between gap-2 px-6 py-3">
       <h1 class="font-semibold text-xl truncate">
-        {{ activeTable?.name ?? 'Tables' }}
+        {{ activeTable?.data?.name ?? 'Tables' }}
       </h1>
       <div class="flex shrink-0 gap-2">
         <ui-button
@@ -59,13 +59,12 @@
 
     <template v-else>
       <table-dynamic
-        :table="activeTable"
+        :table="activeTable.data"
         :loading="tableAsyncStatus === 'loading'"
-        :virtual="(activeTable.rows.length ?? 0) > 200"
+        :virtual="(activeTable.data.rows.length ?? 0) > 200"
         paginated
         @cell-change="onCellChange"
         @delete-row="openDeleteRowDialog"
-        @rows-reorder="onRowsReorder"
       />
     </template>
   </div>
@@ -122,18 +121,19 @@ const { mutate: upsertValue } = useUpsertValue()
 const dialog = useDialog()
 const { setBreadcrumbs, clearBreadcrumbs } = useBreadcrumbs()
 
-const isCanCreateRows = computed(() => (activeTable.value?.columns.length ?? 0) > 0)
+const isCanCreateRows = computed(() => {
+  return (activeTable.value?.data.columns.length ?? 0) > 0
+})
 
 watch(tableList, (list) => {
-  if (list?.length && !activeTableId.value) activeTableId.value = list[0].id
+  if (list?.data?.length && !activeTableId.value) activeTableId.value = list.data[0].id
 }, { immediate: true })
 
-// Динамические breadcrumbs: Tables > Имя таблицы
 watch(activeTable, (table) => {
   if (table) {
     setBreadcrumbs([
       { label: 'Tables', to: '/tables' },
-      { label: table.name },
+      { label: table.data.name },
     ])
   } else {
     clearBreadcrumbs()
@@ -143,8 +143,8 @@ watch(activeTable, (table) => {
 function openCreateTableDialog() {
   dialog.open(h(CreateTableDialog, {
     onCreated: async (name: string) => {
-      const t = await createTable(name)
-      activeTableId.value = t.id
+      const { data } = await createTable(name)
+      activeTableId.value = data.id
     },
   }))
 }
@@ -157,7 +157,10 @@ function openAddColumnDialog() {
       options: { label: string, color: string }[]
     }) => {
       if (!activeTableId.value) return
-      await addColumn({ tableId: activeTableId.value, ...payload })
+      await addColumn({
+        tableId: activeTableId.value,
+        ...payload,
+      })
     },
   }))
 }
@@ -166,7 +169,10 @@ function openDeleteRowDialog(rowId: number) {
   dialog.open(h(DeleteConfirmDialog, {
     type: 'row',
     onConfirm: async () => {
-      await deleteRow({ id: rowId, tableId: activeTableId.value! })
+      await deleteRow({
+        id: rowId,
+        tableId: activeTableId.value!,
+      })
     },
   }))
 }
@@ -178,8 +184,11 @@ async function onAddRow() {
 
 function onCellChange(rowId: number, columnId: number, value: string) {
   if (!activeTableId.value) return
-  upsertValue({ rowId, columnId, value, tableId: activeTableId.value })
+  upsertValue({
+    rowId,
+    columnId,
+    value,
+    tableId: activeTableId.value,
+  })
 }
-
-function onRowsReorder(_orderedIds: number[]) {}
 </script>

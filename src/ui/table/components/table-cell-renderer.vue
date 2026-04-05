@@ -137,7 +137,7 @@ function onInput(val: string) {
 
   &:focus {
     border-radius: 4px;
-    background: var(--color-muted);
+    background: var(--color-foreground);
   }
 
   &--number {

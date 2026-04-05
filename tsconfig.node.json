@@ -19,6 +19,7 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
+    "env.d.ts",
     "api/**/*.ts",
     "drizzle.config.ts",
     "vite.config.ts",

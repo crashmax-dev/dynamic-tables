@@ -1,26 +1,46 @@
-import { useMutation, useQuery, useQueryCache } from '@pinia/colada'
-import { tablesApi } from '@/api/tables'
+import {
+  useMutation,
+  useQuery,
+  useQueryCache,
+} from '@pinia/colada'
+import {
+  deleteApiRowsById,
+  deleteApiTablesById,
+  getApiTables,
+  getApiTablesById,
+  patchApiColumnsById,
+  patchApiColumnsReorder,
+  patchApiRowsReorder,
+  postApiColumns,
+  postApiRows,
+  postApiTables,
+  putApiRowsByRowIdValues,
+} from '@/api'
 import type { ColumnType } from '@/types'
 
 export function useTablesQuery() {
   return useQuery({
     key: ['tables'],
-    query: () => tablesApi.getAll(),
+    query: () => getApiTables(),
   })
 }
 
 export function useTableQuery(id: () => number | null) {
   return useQuery({
     key: () => ['tables', id()],
-    query: () => tablesApi.getById(id()!),
-    enabled: () => id() != null,
+    query: () => getApiTablesById({
+      path: { id: id() },
+    }),
+    enabled: () => id() !== null,
   })
 }
 
 export function useCreateTable() {
   const cache = useQueryCache()
   return useMutation({
-    mutation: (name: string) => tablesApi.create(name),
+    mutation: (name: string) => postApiTables({
+      body: { name },
+    }),
     onSettled: () => cache.invalidateQueries({ key: ['tables'] }),
   })
 }
@@ -28,7 +48,9 @@ export function useCreateTable() {
 export function useDeleteTable() {
   const cache = useQueryCache()
   return useMutation({
-    mutation: (id: number) => tablesApi.delete(id),
+    mutation: (id: number) => deleteApiTablesById({
+      path: { id },
+    }),
     onSuccess: (_data, id) => {
       cache.setQueryData(['tables', id], undefined)
       cache.invalidateQueries({ key: ['tables'] })
@@ -39,7 +61,9 @@ export function useDeleteTable() {
 export function useAddRow() {
   const cache = useQueryCache()
   return useMutation({
-    mutation: (tableId: number) => tablesApi.addRow(tableId),
+    mutation: (tableId: number) => postApiRows({
+      body: { tableId },
+    }),
     onSettled: (_data, _error, tableId) => cache.invalidateQueries({ key: ['tables', tableId] }),
   })
 }
@@ -47,12 +71,12 @@ export function useAddRow() {
 export function useAddColumn() {
   const cache = useQueryCache()
   return useMutation({
-    mutation: (data: {
+    mutation: (body: {
       tableId: number
       name: string
       type: ColumnType
       options?: { label: string, color?: string }[]
-    }) => tablesApi.addColumn(data),
+    }) => postApiColumns({ body }),
     onSettled: (_data, _error, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
   })
 }
@@ -62,12 +86,15 @@ export function useUpdateColumn() {
   return useMutation({
     mutation: ({
       id,
-      data,
+      body,
     }: {
       id: number
       tableId: number
-      data: { name?: string, visible?: boolean, order?: number }
-    }) => tablesApi.updateColumn(id, data),
+      body: { name?: string, visible?: boolean, order?: number }
+    }) => patchApiColumnsById({
+      path: { id },
+      body,
+    }),
     onSuccess: (_result, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
   })
 }
@@ -75,7 +102,9 @@ export function useUpdateColumn() {
 export function useReorderColumns() {
   const cache = useQueryCache()
   return useMutation({
-    mutation: ({ orderedIds }: { tableId: number, orderedIds: number[] }) => tablesApi.reorderColumns(orderedIds),
+    mutation: ({ orderedIds }: { tableId: number, orderedIds: number[] }) => patchApiColumnsReorder({
+      body: { orderedIds },
+    }),
     onSettled: (_data, _error, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
   })
 }
@@ -83,7 +112,9 @@ export function useReorderColumns() {
 export function useReorderRows() {
   const cache = useQueryCache()
   return useMutation({
-    mutation: ({ orderedIds }: { tableId: number, orderedIds: number[] }) => tablesApi.reorderRows(orderedIds),
+    mutation: ({ orderedIds }: { tableId: number, orderedIds: number[] }) => patchApiRowsReorder({
+      body: { orderedIds },
+    }),
     onSettled: (_data, _error, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
   })
 }
@@ -100,7 +131,13 @@ export function useUpsertValue() {
       columnId: number
       value: string
       tableId: number
-    }) => tablesApi.upsertValue(rowId, columnId, value),
+    }) => putApiRowsByRowIdValues({
+      path: { rowId },
+      body: {
+        value,
+        columnId,
+      },
+    }),
     onError: (_error, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
   })
 }
@@ -108,7 +145,9 @@ export function useUpsertValue() {
 export function useDeleteRow() {
   const cache = useQueryCache()
   return useMutation({
-    mutation: ({ id }: { id: number, tableId: number }) => tablesApi.deleteRow(id),
+    mutation: ({ id }: { id: number, tableId: number }) => deleteApiRowsById({
+      path: { id },
+    }),
     onSettled: (_data, _error, vars) => cache.invalidateQueries({ key: ['tables', vars.tableId] }),
   })
 }

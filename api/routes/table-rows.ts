@@ -1,62 +1,125 @@
+import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi'
 import { and, eq } from 'drizzle-orm'
-import { Hono } from 'hono'
 import { db } from '../db/client.ts'
 import { entityValues, tableRows } from '../db/schema.ts'
+import { OkResponseSchema, TableRowSchema } from '../db/zod-schemas.ts'
 
-export const rowsRouter = new Hono()
+export const rowsRouter = new OpenAPIHono()
 
-rowsRouter.post('/', async (c) => {
-  const { tableId } = await c.req.json<{ tableId: number }>()
-  const [row] = await db
-    .insert(tableRows)
-    .values({ tableId })
-    .returning()
-  return c.json({ ...row, values: [] }, 201)
-})
+const IdParamSchema = z.object({ id: z.coerce.number() })
 
-rowsRouter.delete('/:id', async (c) => {
-  const id = Number(c.req.param('id'))
-  await db
-    .delete(tableRows)
-    .where(eq(tableRows.id, id))
-  return c.json({ ok: true })
-})
+// POST /api/rows
+rowsRouter.openapi(
+  createRoute({
+    method: 'post',
+    path: '/',
+    tags: ['Rows'],
+    summary: 'Add a row to a table',
+    request: {
+      body: {
+        content: { 'application/json': { schema: z.object({ tableId: z.number() }) } },
+      },
+    },
+    responses: {
+      201: {
+        content: { 'application/json': { schema: TableRowSchema } },
+        description: 'Created row',
+      },
+    },
+  }),
+  async (c) => {
+    const { tableId } = c.req.valid('json')
+    const [row] = await db.insert(tableRows).values({ tableId }).returning()
+    return c.json(TableRowSchema.parse({ ...row, values: [] }), 201)
+  },
+)
 
-rowsRouter.patch('/reorder', async (c) => {
-  const { orderedIds } = await c.req.json<{ orderedIds: number[] }>()
-  const result = orderedIds.map((id, index) => {
-    return db
-      .update(tableRows)
-      .set({ order: index })
-      .where(eq(tableRows.id, id))
-  })
-  await Promise.all(result)
-  return c.json({ ok: true })
-})
+// PATCH /api/rows/reorder
+rowsRouter.openapi(
+  createRoute({
+    method: 'patch',
+    path: '/reorder',
+    tags: ['Rows'],
+    summary: 'Reorder rows',
+    request: {
+      body: {
+        content: { 'application/json': { schema: z.object({ orderedIds: z.array(z.number()) }) } },
+      },
+    },
+    responses: {
+      200: {
+        content: { 'application/json': { schema: OkResponseSchema } },
+        description: 'Reordered',
+      },
+    },
+  }),
+  async (c) => {
+    const { orderedIds } = c.req.valid('json')
+    await Promise.all(
+      orderedIds.map((id, index) => db.update(tableRows).set({ order: index }).where(eq(tableRows.id, id)),
+      ),
+    )
+    return c.json({ ok: true as const })
+  },
+)
 
-rowsRouter.put('/:rowId/values', async (c) => {
-  const rowId = Number(c.req.param('rowId'))
-  const { columnId, value } = await c.req.json<{
-    columnId: number
-    value: string
-  }>()
+// DELETE /api/rows/:id
+rowsRouter.openapi(
+  createRoute({
+    method: 'delete',
+    path: '/{id}',
+    tags: ['Rows'],
+    summary: 'Delete a row',
+    request: { params: IdParamSchema },
+    responses: {
+      200: {
+        content: { 'application/json': { schema: OkResponseSchema } },
+        description: 'Deleted',
+      },
+    },
+  }),
+  async (c) => {
+    const { id } = c.req.valid('param')
+    await db.delete(tableRows).where(eq(tableRows.id, id))
+    return c.json({ ok: true as const })
+  },
+)
 
-  const existing = await db.query.entityValues.findFirst({
-    where: and(
-      eq(entityValues.rowId, rowId),
-      eq(entityValues.columnId, columnId),
-    ),
-  })
-
-  if (existing) {
-    await db.update(entityValues)
-      .set({ value })
-      .where(eq(entityValues.id, existing.id))
-  } else {
-    await db
-      .insert(entityValues)
-      .values({ rowId, columnId, value })
-  }
-
-  return c.json({ ok: true })
-})
+// PUT /api/rows/:rowId/values
+rowsRouter.openapi(
+  createRoute({
+    method: 'put',
+    path: '/{rowId}/values',
+    tags: ['Rows'],
+    summary: 'Upsert a cell value',
+    request: {
+      params: z.object({ rowId: z.coerce.number() }),
+      body: {
+        content: {
+          'application/json': {
+            schema: z.object({ columnId: z.number(), value: z.string() }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        content: { 'application/json': { schema: OkResponseSchema } },
+        description: 'Upserted',
+      },
+    },
+  }),
+  async (c) => {
+    const { rowId } = c.req.valid('param')
+    const { columnId, value } = c.req.valid('json')
+    const existing = await db.query.entityValues.findFirst({
+      where: and(eq(entityValues.rowId, rowId), eq(entityValues.columnId, columnId)),
+    })
+    if (existing) {
+      await db.update(entityValues).set({ value }).where(eq(entityValues.id, existing.id))
+    } else {
+      await db.insert(entityValues).values({ rowId, columnId, value })
+    }
+    return c.json({ ok: true as const })
+  },
+)

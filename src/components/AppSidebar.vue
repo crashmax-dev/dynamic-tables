@@ -48,7 +48,7 @@ const {
 
 const projects = computed(() => {
   if (!tableList.value) return []
-  return tableList.value.map(table => ({
+  return tableList.value.data.map(table => ({
     id: table.id,
     name: table.name,
     url: `/tables?table=${table.id}`,

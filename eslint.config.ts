@@ -9,6 +9,7 @@ const config = antfu({
   ignores: [
     'api/db/migrations/meta',
     'src/components/ui',
+    'src/api',
   ],
   formatters: {
     css: true,

@@ -1,7 +1,7 @@
-import type { TableColumn } from './types'
+import type { GetApiTablesByIdResponses } from './api'
 
 export interface TableMeta {
-  column: TableColumn
+  column: GetApiTablesByIdResponses['200'][0]
   label: string
   type: string
 }

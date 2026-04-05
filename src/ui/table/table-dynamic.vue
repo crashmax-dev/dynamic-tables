@@ -92,7 +92,7 @@
 <script setup lang="ts">
 import { Loader2 as Loader2Icon } from 'lucide-vue-next'
 import { computed, useTemplateRef } from 'vue'
-import type { DynamicTable } from '@/types'
+import type { GetApiTablesByIdResponses } from '@/api'
 import TableHeaderContextMenu from './components/table-header-context-menu.vue'
 import TableHeader from './components/table-header.vue'
 import TablePagination from './components/table-pagination.vue'
@@ -104,7 +104,7 @@ import { useTableDrag } from './composables/use-table-drag'
 import { useTableVirtualizer } from './composables/use-table-virtualizer'
 
 const props = defineProps<{
-  table: DynamicTable
+  table: GetApiTablesByIdResponses['200']
   virtual?: boolean
   loading?: boolean
   paginated?: boolean
@@ -113,7 +113,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'cell-change', rowId: number, columnId: number, value: string): void
   (event: 'delete-row', rowId: number): void
-  (event: 'rows-reorder', orderedIds: number[]): void
 }>()
 
 const scrollRef = useTemplateRef<HTMLElement>('scrollRef')
@@ -130,10 +129,28 @@ const {
 } = useTableCore(() => props.table)
 
 const tableId = computed(() => props.table.id)
-const { dragRowId, onDragStart, onDragOver, onDragEnd } = useTableDrag(localRows, tableId)
+
+const {
+  dragRowId,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+} = useTableDrag(localRows, tableId)
+
 const virtualFlag = computed(() => props.virtual)
-const { rowVirtualizer, virtualRows } = useTableVirtualizer(scrollRef, localRows, virtualFlag)
-const tableRows = computed(() => tableCore.getRowModel().rows.map((row) => row.original))
-const { ctxMenu, ctxMenuColumns, onHeaderContextMenu, onToggleVisibility, onMoveColumn }
-  = useTableColumns(props.table, tableCore, localColumnOrder)
+const {
+  rowVirtualizer,
+  virtualRows,
+} = useTableVirtualizer(scrollRef, localRows, virtualFlag)
+const tableRows = computed(() => {
+  return tableCore.getRowModel().rows.map((row) => row.original)
+})
+
+const {
+  ctxMenu,
+  ctxMenuColumns,
+  onHeaderContextMenu,
+  onToggleVisibility,
+  onMoveColumn,
+} = useTableColumns(props.table, tableCore, localColumnOrder)
 </script>
