@@ -1,11 +1,12 @@
 import { computed, reactive, toValue } from 'vue'
+import type { GetApiTablesByIdResponses } from '@/api'
 import { useReorderColumns, useUpdateColumn } from '@/queries/tables'
-import type { DynamicTable, TableRow } from '@/types'
+import type { TableRow } from '@/types'
 import type { Table } from '@tanstack/vue-table'
 import type { MaybeRefOrGetter } from 'vue'
 
 export function useTableColumns(
-  tableRef: MaybeRefOrGetter<DynamicTable>,
+  tableRef: MaybeRefOrGetter<GetApiTablesByIdResponses['200']>,
   tableCore: Table<TableRow>,
   localColumnOrder: { value: string[] },
 ) {
@@ -43,7 +44,7 @@ export function useTableColumns(
     updateColumn({
       id: col.id,
       tableId: table.value.id,
-      data: { visible: !col.visible },
+      body: { visible: !col.visible },
     })
     ctxMenu.visible = false
   }

@@ -133,12 +133,11 @@ function onInput(val: string) {
   background: transparent;
   padding: 0 0.5rem;
   width: 100%;
-  color: var(--color-foreground);
   font-size: 0.875rem;
 
   &:focus {
     border-radius: 4px;
-    background: var(--color-muted);
+    background: var(--color-foreground);
   }
 
   &--number {
@@ -159,7 +158,6 @@ function onInput(val: string) {
     outline: none;
     border: none;
     background: transparent;
-    color: var(--color-foreground);
     font-size: 0.875rem;
   }
 

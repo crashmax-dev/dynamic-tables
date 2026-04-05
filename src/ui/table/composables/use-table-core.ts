@@ -4,33 +4,39 @@ import {
   getSortedRowModel,
   useVueTable,
 } from '@tanstack/vue-table'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toValue, watch } from 'vue'
+import type { GetApiTablesByIdResponses } from '@/api'
 import { useTableStore } from '@/stores/use-table-store'
-import type { DynamicTable, TableRow } from '@/types'
+import type { TableRow } from '@/types'
 import type { Updater } from '@tanstack/vue-table'
+import type { MaybeRefOrGetter } from 'vue'
 
-export function useTableCore(table: () => DynamicTable) {
+export function useTableCore(dynamicTable: MaybeRefOrGetter<GetApiTablesByIdResponses['200']>) {
   const uiStore = useTableStore()
 
+  const table = computed(() => {
+    return toValue(dynamicTable)
+  })
+
   function getColumnIds() {
-    return table().columns.map(c => String(c.id))
+    return table.value.columns.map(c => String(c.id))
   }
 
-  const uiState = computed(() => uiStore.getState(table().id, getColumnIds()))
+  const uiState = computed(() => uiStore.getState(table.value.id, getColumnIds()))
 
-  const localRows = ref<TableRow[]>([...table().rows])
-  watch(() => table().rows, rows => {
+  const localRows = ref<TableRow[]>([...table.value.rows])
+  watch(() => table.value.rows, rows => {
     localRows.value = [...rows]
   })
 
   const localVisibility = computed<Record<string, boolean>>(() => {
-    return Object.fromEntries(table().columns.map(c => [String(c.id), c.visible]))
+    return Object.fromEntries(table.value.columns.map(c => [String(c.id), c.visible]))
   })
 
   const localColumnOrder = ref<string[]>(uiState.value.columnOrder)
-  watch(() => table().columns, () => {
+  watch(() => table.value.columns, () => {
     const ids = getColumnIds()
-    localColumnOrder.value = uiStore.getState(table().id, ids).columnOrder
+    localColumnOrder.value = uiStore.getState(table.value.id, ids).columnOrder
   })
 
   const localSorting = ref(uiState.value.sorting)
@@ -43,23 +49,24 @@ export function useTableCore(table: () => DynamicTable) {
     return typeof updater === 'function' ? (updater as (v: T) => T)(current) : updater
   }
 
-  const columnDefs = computed(() => table().columns.map(col => ({
-    id: String(col.id),
-    accessorFn: (row: TableRow) => {
-      const val = row.values.find(v => v.columnId === col.id)?.value ?? null
-      if (col.type === 'number') return val ? Number(val) : null
-      if (col.type === 'toggle') return val === 'true'
-      return val ?? ''
-    },
-    enableSorting: true,
-    size: 180,
-    meta: {
-      column: col,
-      label: col.name,
-      type: col.type,
-    },
-  })),
-  )
+  const columnDefs = computed(() => {
+    return table.value.columns.map(col => ({
+      id: String(col.id),
+      accessorFn: (row: TableRow) => {
+        const val = row.values.find(v => v.columnId === col.id)?.value ?? null
+        if (col.type === 'number') return val ? Number(val) : null
+        if (col.type === 'toggle') return val === 'true'
+        return val ?? ''
+      },
+      enableSorting: true,
+      size: 180,
+      meta: {
+        column: col,
+        label: col.name,
+        type: col.type,
+      },
+    }))
+  })
 
   const tableCore = useVueTable({
     get data() {
@@ -88,17 +95,17 @@ export function useTableCore(table: () => DynamicTable) {
     onColumnOrderChange: updater => {
       const next = applyUpdater(updater, localColumnOrder.value)
       localColumnOrder.value = next
-      uiStore.setState(table().id, { columnOrder: next })
+      uiStore.setState(table.value.id, { columnOrder: next })
     },
     onSortingChange: updater => {
       const next = applyUpdater(updater, localSorting.value)
       localSorting.value = next
-      uiStore.setState(table().id, { sorting: next })
+      uiStore.setState(table.value.id, { sorting: next })
     },
     onPaginationChange: updater => {
       const next = applyUpdater(updater, localPagination.value)
       localPagination.value = next
-      uiStore.setState(table().id, { pagination: next })
+      uiStore.setState(table.value.id, { pagination: next })
     },
     manualPagination: false,
   })
